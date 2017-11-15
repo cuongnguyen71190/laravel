@@ -32,6 +32,9 @@
 				{{csrf_field()}}
 				<div class="form-group">
 					<textarea name="body" id="body" class="form-control" placeholder="Have something to say?" rows="5"></textarea>
+				@if ($errors->has('body'))
+				    <div class="error">{{ $errors->first('body') }}</div>
+				@endif
 				</div>
 
 				<button type="submit" class="btn btn-default">Post</button>
@@ -39,7 +42,7 @@
 		</div>
 	</div>
 	@else
-	<p>Please <a href="{{route('login')}} 	">sign in</a> to participate this discussion.</p>
+	<p style="text-align: center;">Please <a href="{{route('login')}} 	">sign in</a> to participate this discussion.</p>
 	@endif
 </div>
 @endsection
