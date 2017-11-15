@@ -3,18 +3,34 @@
 namespace App\Http\Controllers;
 
 use App\Thread;
+use App\Channel;
 use Illuminate\Http\Request;
+use Validator;
 
 class ThreadsController extends Controller
 {
+    /**
+     * [__construct description]
+     */
+    public function __construct()
+    {
+        $this->middleware('auth')->only(['create', 'store']);
+    }
+
     /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index($channelSlug = null)
     {
-        $threads = Thread::latest()->get();
+        if ($channelSlug) {
+            $channelId = Channel::where('slug', $channelSlug)->pluck('id')->first();
+            $threads = Thread::where('channel_id', $channelId)->latest()->get();
+        } else {
+            $threads = Thread::latest()->get();
+        }
+
         return view('threads.index', compact('threads'));
     }
 
@@ -25,7 +41,7 @@ class ThreadsController extends Controller
      */
     public function create()
     {
-        //
+        return view('threads.create');
     }
 
     /**
@@ -36,16 +52,37 @@ class ThreadsController extends Controller
      */
     public function store(Request $request)
     {
-        //
+
+        $validator = Validator::make($request->all(), [
+            'title'      => 'required',
+            'body'       => 'required',
+            'channel_id' => 'required|exists:channels,id'
+        ]);
+
+        if ($validator->fails()) {
+            return redirect(route('threads.create'))
+                        ->withErrors($validator)
+                        ->withInput();
+        }
+
+        $thread = Thread::create([
+            'user_id'    => auth()->id(),
+            'channel_id' => request('channel_id'),
+            'title'      => request('title'),
+            'body'       => request('body')
+        ]);
+
+        return redirect($thread->path());
     }
 
     /**
      * Display the specified resource.
-     *
+     * 
+     * @param  \App\Channel  $channelId
      * @param  \App\Thread  $thread
      * @return \Illuminate\Http\Response
      */
-    public function show(Thread $thread)
+    public function show($channelId, Thread $thread)
     {
         return view('threads.show', compact('thread'));
     }
