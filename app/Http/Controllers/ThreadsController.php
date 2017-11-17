@@ -6,6 +6,7 @@ use App\Thread;
 use App\Channel;
 use Illuminate\Http\Request;
 use Validator;
+use App\Filters\ThreadFilters;
 
 class ThreadsController extends Controller
 {
@@ -22,16 +23,22 @@ class ThreadsController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index($channelSlug = null)
+    public function index(Channel $channel, ThreadFilters $filters)
     {
-        if ($channelSlug) {
-            $channelId = Channel::where('slug', $channelSlug)->pluck('id')->first();
-            $threads = Thread::where('channel_id', $channelId)->latest()->get();
-        } else {
-            $threads = Thread::latest()->get();
-        }
+        $threads = $this->getThreads($channel, $filters);
 
         return view('threads.index', compact('threads'));
+    }
+
+    private function getThreads($channel, $filters)
+    {
+        $threads = Thread::latest()->filter($filters);
+
+        if ($channel->exists) {
+            $threads->where('channel_id', $channel->id);
+        }
+
+        return $threads->get();
     }
 
     /**
@@ -41,7 +48,9 @@ class ThreadsController extends Controller
      */
     public function create()
     {
-        return view('threads.create');
+        $channels = Channel::pluck('name', 'id');
+        $channels->prepend('Please Select');
+        return view('threads.create', compact('channels'));
     }
 
     /**
@@ -52,7 +61,6 @@ class ThreadsController extends Controller
      */
     public function store(Request $request)
     {
-
         $validator = Validator::make($request->all(), [
             'title'      => 'required',
             'body'       => 'required',
@@ -84,7 +92,10 @@ class ThreadsController extends Controller
      */
     public function show($channelId, Thread $thread)
     {
-        return view('threads.show', compact('thread'));
+        return view('threads.show', [
+            'thread' => $thread,
+            'replies' => $thread->replies()->paginate(10)
+        ]);
     }
 
     /**
