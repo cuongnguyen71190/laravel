@@ -9,22 +9,32 @@
 				<div class="panel-body">
 					{!! Form::open(['route' => 'threads.store']) !!}
 						<div class="form-group">
+							{!! Form::label('channel_id', 'Choose a Channel') !!}	
+							{!! Form::select('channel_id', $channels, old('channel_id'), ['class' => 'form-control', 'id' => 'channel_id']) !!}
+							@if ($errors->has('channel_id'))
+							    <div class="error alert alert-danger">{{ $errors->first('channel_id') }}</div>
+							@endif
+						</div>
+
+						<div class="form-group">
 							{!! Form::label('title', 'Title') !!}
-							{!! Form::text('title', '', ['class' => 'form-control', 'id' => 'title', 'placeholder' => 'title']) !!}
+							{!! Form::text('title', old('title'), ['class' => 'form-control', 'id' => 'title', 'placeholder' => 'title']) !!}
 							@if ($errors->has('title'))
-							    <div class="error">{{ $errors->first('title') }}</div>
+							    <div class="error alert alert-danger">{{ $errors->first('title') }}</div>
 							@endif
 						</div>
 
 						<div class="form-group">
 							{!! Form::label('body', 'Body') !!}
-							{!! Form::textarea('body', '', ['class' => 'form-control', 'id' => 'body', 'placeholder' => 'body', 'rows' => 8]) !!}
+							{!! Form::textarea('body', old('body'), ['class' => 'form-control', 'id' => 'body', 'placeholder' => 'body', 'rows' => 8]) !!}
 							@if ($errors->has('body'))
-							    <div class="error">{{ $errors->first('body') }}</div>
+							    <div class="error alert alert-danger">{{ $errors->first('body') }}</div>
 							@endif
 						</div>
 
-						{!! Form::submit('Post', ['class' => 'btn btn-primary']) !!}
+						<div class="form-group">
+							{!! Form::submit('Post', ['class' => 'btn btn-primary']) !!}
+						</div>
 					{!! Form::close() !!}
 				</div>
 			</div>
