@@ -15,7 +15,8 @@
     <style>
         body { padding-bottom: 100px; }
         .level { display: flex; align-items: center; }
-        .flex { flex: 1;  }
+        .flex { flex: 1;}
+        .channel { height: 200px; overflow: auto; }
     </style>
 </head>
 <body>
@@ -53,7 +54,7 @@
                                 <li><a href="/threads?by={{auth()->user()->name}}">My Threads</a></li>
                                 @endif
 
-                                <li><a href="/threads?popular=1">Popular All Time</a></li>
+                                <li><a href="/threads?popular=1">Popular Threads</a></li>
                             </ul>
                         </li>
                         
@@ -65,8 +66,8 @@
                                 <span class="caret"></span>
                             </a>
 
-                            <ul class="dropdown-menu">
-                                @foreach (App\Channel::all() as $channel)
+                            <ul class="dropdown-menu channel">
+                                @foreach ($channels as $channel)
                                 <li><a href="/threads/{{$channel->slug}}">{{$channel->name}}</a></li>
                                 @endforeach
                             </ul>
