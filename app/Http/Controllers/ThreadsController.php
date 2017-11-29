@@ -15,7 +15,7 @@ class ThreadsController extends Controller
      */
     public function __construct()
     {
-        $this->middleware('auth')->only(['create', 'store']);
+        $this->middleware('auth')->except(['index', 'show']);
     }
 
     /**
@@ -30,16 +30,6 @@ class ThreadsController extends Controller
         return view('threads.index', compact('threads'));
     }
 
-    private function getThreads($channel, $filters)
-    {
-        $threads = Thread::latest()->filter($filters);
-
-        if ($channel->exists) {
-            $threads->where('channel_id', $channel->id);
-        }
-
-        return $threads->get();
-    }
 
     /**
      * Show the form for creating a new resource.
@@ -86,11 +76,11 @@ class ThreadsController extends Controller
     /**
      * Display the specified resource.
      * 
-     * @param  \App\Channel  $channelId
+     * @param  \App\Channel  $channel
      * @param  \App\Thread  $thread
      * @return \Illuminate\Http\Response
      */
-    public function show($channelId, Thread $thread)
+    public function show($channel, Thread $thread)
     {
         return view('threads.show', [
             'thread' => $thread,
@@ -127,8 +117,33 @@ class ThreadsController extends Controller
      * @param  \App\Thread  $thread
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Thread $thread)
+    public function destroy($channel, Thread $thread)
     {
-        //
+        $this->authorize('update', $thread);
+
+        $thread->delete();
+
+        if (request()->wantsJson()) {
+            return response([], 204);
+        }
+
+        return redirect('/threads');
+    }
+
+    /**
+     * [getThreads description]
+     * @param  [type] $channel [description]
+     * @param  [type] $filters [description]
+     * @return [type]          [description]
+     */
+    private function getThreads($channel, $filters)
+    {
+        $threads = Thread::latest()->filter($filters);
+
+        if ($channel->exists) {
+            $threads->where('channel_id', $channel->id);
+        }
+
+        return $threads->get();
     }
 }
