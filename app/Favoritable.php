@@ -6,6 +6,14 @@ namespace App;
  */
 trait Favoritable
 {
+    protected static function bootFavoritable()
+    {
+        static::deleting(function ($model) {
+            $model->favorites->each->delete();
+        });
+    }
+
+
 	/**
 	 * [favorites description]
 	 * @return [type] [description]
@@ -27,6 +35,13 @@ trait Favoritable
     	}
     }
 
+    public function unFavorite()
+    {
+        $attributes = ['user_id' => auth()->id()];
+
+        $this->favorites()->where($attributes)->get()->each->delete();
+    }
+
     /**
      * [isFavorited description]
      * @return boolean [description]
@@ -34,6 +49,11 @@ trait Favoritable
     public function isFavorited()
     {
         return !! $this->favorites->where('user_id', auth()->id())->count();
+    }
+
+    public function getIsFavoritedAttribute()
+    {
+        return $this->isFavorited();
     }
 
     /**

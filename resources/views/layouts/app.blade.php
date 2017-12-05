@@ -17,6 +17,8 @@
         .level { display: flex; align-items: center; }
         .flex { flex: 1;}
         .channel { height: 200px; overflow: auto; }
+        .mr-1 { margin-right: 1em; }
+        [v-cloak] { display: none; }
     </style>
 </head>
 <body>
@@ -25,6 +27,7 @@
         @include('layouts.nav')
 
         @yield('content')
+        <flash message="{{ session('flash') }}"></flash>
     </div>
 
     <!-- Scripts -->
