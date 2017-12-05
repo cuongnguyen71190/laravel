@@ -1,19 +1,38 @@
-<div class="panel panel-default">
-	<div class="panel-heading">
-		<div class="level">
-			<h5 class="flex">
-				<a href="{{ route('profile', $reply->owner) }}">
-					{{$reply->owner->name}}
-				</a> <i>said </i> {{$reply->created_at->diffForHumans()}}
-			</h5>
-			<div>
-				{!! Form::open(['route' => ['favorites', $reply->id]]) !!}
-				{!! Form::button($reply->favorites_count . ' ' . str_plural('Favorite', $reply->favorites_count), ['type' => 'submit', 'class' => 'btn btn-default', $reply->isFavorited() ? 'disabled' : '']) !!}
-				{!! Form::close() !!}
+<reply :attributes="{{ $reply }}" inline-template v-cloak>
+	<div id="reply-{{$reply->id}}" class="panel panel-default">
+		<div class="panel-heading">
+			<div class="level">
+				<h5 class="flex">
+					<a href="{{ route('profile', $reply->owner) }}">
+						{{$reply->owner->name}}
+					</a> <i>said </i> {{$reply->created_at->diffForHumans()}}
+				</h5>
+
+				@if (auth()->check())
+					<div>
+						<favorite :reply="{{ $reply }}"></favorite>
+					</div>
+				@endif
 			</div>
 		</div>
+		<div class="panel-body">
+			<div v-if="editing">
+				<div class="form-group">
+					<textarea class="form-control" v-model="body"></textarea>
+				</div>
+				<input type="hidden" name="_method" value="PATCH">
+				<button class="btn btn-xs btn-primary" @click="update">Update</button>
+				<button class="btn btn-xs btn-link" @click="editing = false">Cancel</button>
+			</div>
+			<div v-else v-text="body">
+			</div>
+		</div>
+		
+		@can ('update', $reply)
+			<div class="panel-footer level">
+				<button class="btn btn-xs mr-1" @click="editing = true">Edit</button>
+				<button class="btn btn-xs btn-danger mr-1" @click="destroy">Delete</button>
+			</div>
+		@endcan
 	</div>
-	<div class="panel-body">
-		{{$reply->body}}
-	</div>
-</div>
+</reply>
